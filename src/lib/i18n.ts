@@ -19,7 +19,13 @@ const RTL_LANGS: Lang[] = ['ar', 'fa'];
 export function currentLang(): Lang {
   const raw = (getLang() || 'en').toLowerCase();
   if (raw.startsWith('ar')) return 'ar';
-  if (raw.startsWith('fa') || raw.startsWith('ku') || raw.startsWith('ckb')) {
+  // Kurdish: locale `fa`, but the backend code is `fr` — accept either here.
+  if (
+    raw.startsWith('fa') ||
+    raw.startsWith('fr') ||
+    raw.startsWith('ku') ||
+    raw.startsWith('ckb')
+  ) {
     return 'fa';
   }
   return 'en';

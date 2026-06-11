@@ -80,9 +80,29 @@ export function getAdRequestId(): string {
   return param('ad_request_id', 'adRequestId', 'request_id') ?? '2971';
 }
 
-/** Preferred language for the API (Accept-Language). */
+/** Raw language code as passed in the URL (ar / en / fa for Kurdish). */
 export function getLang(): string {
   return param('lang', 'locale') ?? 'en';
+}
+
+/**
+ * Language code the ksell backend expects in the `lang` request header. Its
+ * three languages are en / ar / fr — where **fr means Kurdish** (the app's
+ * Kurdish locale is `fa`, mapped to `fr` here, exactly like the Flutter
+ * `currentLang()` helper does).
+ */
+export function apiLang(): string {
+  const raw = getLang().toLowerCase();
+  if (raw.startsWith('ar')) return 'ar';
+  if (
+    raw.startsWith('fa') ||
+    raw.startsWith('fr') ||
+    raw.startsWith('ku') ||
+    raw.startsWith('ckb')
+  ) {
+    return 'fr';
+  }
+  return 'en';
 }
 
 /**
@@ -114,9 +134,13 @@ async function request<T>(
   body?: Record<string, unknown>
 ): Promise<T> {
   const token = getToken();
+  const lang = apiLang();
   const headers: Record<string, string> = {
     Accept: 'application/json',
-    'Accept-Language': getLang(),
+    // The ksell backend reads the language from the `lang` header (en/ar/fr);
+    // Accept-Language is sent too for good measure.
+    lang,
+    'Accept-Language': lang,
   };
   if (token) headers.Authorization = `Bearer ${token}`;
   if (body) headers['Content-Type'] = 'application/json';
