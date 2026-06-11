@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, HelpCircle, Loader2 } from 'lucide-react';
+import { Star, Loader2 } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { Header } from '../components/Header';
+import { HowItWorks } from '../components/HowItWorks';
 import { useApi } from '../hooks/useApi';
 import { fetchAdPackages, getAdRequestId, AdPackage } from '../lib/api';
 
@@ -97,13 +98,7 @@ export function SelectPlan() {
         </div>
       }
 
-      {/* Floating How it works */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20">
-        <button className="bg-app-accent/10 dark:bg-app-accent/20 text-app-accent dark:text-red-400 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium border border-app-accent/20">
-          <HelpCircle className="w-4 h-4" />
-          How it work
-        </button>
-      </div>
+      <HowItWorks />
     </Layout>);
 
 }

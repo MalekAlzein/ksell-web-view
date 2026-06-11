@@ -50,6 +50,16 @@ export function getLang(): string {
   return param('lang', 'locale') ?? 'en';
 }
 
+/**
+ * YouTube showcase link supplied by the native app via the WebView URL, e.g.
+ *   /plans?token=<bearer>&showcase_url=https://youtu.be/abc123
+ * Mirrors the Flutter `ShowCaseRequestYoutubeLink` Remote Config value, which
+ * the native app reads and forwards to this WebView.
+ */
+export function getShowcaseUrl(): string | null {
+  return param('showcase_url', 'youtube_url', 'video_url');
+}
+
 export class ApiError extends Error {
   status: number;
   payload: unknown;
