@@ -10,8 +10,6 @@ import {
 '../lib/api';
 import { t } from '../lib/i18n';
 
-// Demo fallback so the canvas preview is never blank (used when the API call
-// fails, e.g. opened without an auth token).
 const fallback: { total: number; txns: WalletTransaction[] } = {
   total: 250000,
   txns: [
@@ -43,7 +41,6 @@ export function History() {
       })
       .catch(() => {
         if (!active) return;
-        // Fall back to demo data on first page only.
         if (page === 1) {
           setTotalBalance(fallback.total);
           setTxns(fallback.txns);
@@ -63,7 +60,6 @@ export function History() {
 
   return (
     <Layout>
-      {/* Fixed Header Area */}
       <div className="bg-slate-50 dark:bg-app-dark border-b border-slate-200 dark:border-slate-800 z-20 sticky top-0">
         <Header title={t('transactionHistory')} showBack />
 
@@ -81,7 +77,6 @@ export function History() {
         </div>
       </div>
 
-      {/* Scrollable List */}
       <div className="flex-1 overflow-y-auto">
         {loading && txns.length === 0 ?
         <div className="flex items-center justify-center py-20 text-slate-400">
@@ -111,7 +106,6 @@ export function History() {
                 }}
                 className="p-4 flex items-center gap-4 bg-white dark:bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
 
-                {/* Type icon */}
                 <div
                   className={`p-3 rounded-full shrink-0 ${inbound ? 'bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-500' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
 
@@ -122,19 +116,15 @@ export function History() {
                   }
                 </div>
 
-                {/* Details */}
                 <div className="flex-1 min-w-0">
-                  {/* Reason */}
                   <p className="font-semibold text-slate-900 dark:text-white truncate text-[15px]">
                     {tx.reason ?? (inbound ? t('credit') : t('debit'))}
                   </p>
-                  {/* Created At */}
                   {tx.created_at &&
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       {tx.created_at}
                     </p>
                   }
-                  {/* ad_request_id / transfer_company_id (if available) */}
                   {(tx.ad_request_id || tx.transfer_company_id) &&
                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                       {tx.ad_request_id &&
@@ -151,7 +141,6 @@ export function History() {
                   }
                 </div>
 
-                {/* Amount */}
                 <div className="text-right shrink-0">
                   <p
                     className={`font-bold text-[15px] ${inbound ? 'text-green-600 dark:text-green-500' : 'text-slate-900 dark:text-white'}`}>
@@ -169,7 +158,6 @@ export function History() {
           </div>
         }
 
-        {/* Load more */}
         {hasMore &&
         <div className="p-4">
             <button
@@ -183,7 +171,6 @@ export function History() {
           </div>
         }
 
-        {/* Bottom padding for scroll */}
         <div className="h-12"></div>
       </div>
     </Layout>);

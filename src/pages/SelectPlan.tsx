@@ -9,7 +9,6 @@ import { useApi } from '../hooks/useApi';
 import { fetchAdPackages, getAdRequestId, AdPackage } from '../lib/api';
 import { t } from '../lib/i18n';
 
-// Demo fallback so the screen renders without a token / network.
 const fallback: AdPackage[] = [
 { id: 1, label: 'THE', stars: 1, fees: 10000, features: ['One-time post', 'Showcase the span of 30 days across our application only.'], recommended: false, raw: {} },
 { id: 2, label: 'THE', stars: 2, fees: 15000, features: ['One-time post', 'Showcase the span of 1 month'], recommended: false, raw: {} },
@@ -17,7 +16,6 @@ const fallback: AdPackage[] = [
 
 export function SelectPlan() {
   const navigate = useNavigate();
-  // GET /settings — the list of ad packages.
   const { data, loading } = useApi<AdPackage[]>(fetchAdPackages, [], fallback);
   const plans = data ?? [];
 
@@ -51,7 +49,6 @@ export function SelectPlan() {
           }}
           className="relative pt-3">
 
-            {/* Border Label */}
             <div className="absolute top-0 left-6 bg-slate-50 dark:bg-app-dark px-2 flex items-center gap-1 z-10 text-sm font-bold text-slate-900 dark:text-white">
               {plan.label}
               <div className="flex">
@@ -64,7 +61,6 @@ export function SelectPlan() {
               </div>
             </div>
 
-            {/* Card Content */}
             <div className="border-2 border-slate-200 dark:border-slate-700 rounded-2xl p-5 pt-6 relative">
               <ul className="space-y-2 mb-6 text-sm text-slate-600 dark:text-slate-300">
                 <li className="flex items-start gap-2">

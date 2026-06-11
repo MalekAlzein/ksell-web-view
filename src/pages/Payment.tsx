@@ -36,7 +36,6 @@ export function Payment() {
   const { dir } = useTheme();
   const adRequestId = getAdRequestId();
 
-  // ---- Data: quote (For Pay), wallet balance, transfer companies ----
   const quote = useApi<Quote>(() => fetchQuote(adRequestId), [adRequestId], {
     amount: 50000,
     currency: 'IQD'
@@ -51,7 +50,6 @@ export function Payment() {
   { id: 3, name: 'FastPay' }]
   );
 
-  // ---- Form state ----
   const [method, setMethod] = useState<PaymentMethod>('wallet');
   const [selectedCompany, setSelectedCompany] = useState('');
   const [topUpAmount, setTopUpAmount] = useState('');
@@ -68,7 +66,6 @@ export function Payment() {
     toast.success(t('numberCopied'));
   };
 
-  // ---- Option 1: pay from wallet (PUT /pay-ad-request-with-wallet-flutter) ----
   const handleWalletPay = async () => {
     if (submitting) return;
     setSubmitting(true);
@@ -87,7 +84,6 @@ export function Payment() {
     }
   };
 
-  // ---- Option 2: pay directly via a transfer company (opens its app link) ----
   const handleDirectPay = () => {
     const company = companyList.find((c) => String(c.id) === selectedCompany);
     if (!company) return;
@@ -96,7 +92,6 @@ export function Payment() {
     toast.success(t('paymentUnderReview'));
   };
 
-  // ---- Option 3: top up the wallet (POST /submit-top-up-flutter) ----
   const handleTopUp = async () => {
     if (submitting) return;
     const amount = Number(topUpAmount);
@@ -131,9 +126,7 @@ export function Payment() {
       <Header title={t('payment')} showBack />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-8 pb-24">
-        {/* Top Section: Summary */}
         <div className="space-y-4">
-          {/* Wallet Balance Card - Interactive */}
           <button
             onClick={() => navigate('/history')}
             className="w-full bg-white dark:bg-app-card rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 flex items-center justify-between group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/80">
@@ -159,7 +152,6 @@ export function Payment() {
             </div>
           </button>
 
-          {/* For Pay Card */}
           <div className="w-full bg-white dark:bg-app-card rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-800">
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
               {t('forPay')}
@@ -174,13 +166,11 @@ export function Payment() {
           </div>
         </div>
 
-        {/* Middle Section: Payment Methods */}
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white px-1">
             {t('paymentMethod')}
           </h2>
 
-          {/* Segmented Control */}
           <div className="flex p-1 bg-slate-200 dark:bg-slate-800 rounded-xl">
             {(['wallet', 'direct', 'topup'] as const).map((m) =>
             <button
@@ -200,10 +190,8 @@ export function Payment() {
             )}
           </div>
 
-          {/* Dynamic Content Area */}
           <div className="min-h-[200px]">
             <AnimatePresence mode="wait">
-              {/* WALLET METHOD */}
               {method === 'wallet' &&
               <motion.div
                 key="wallet"
@@ -239,7 +227,6 @@ export function Payment() {
                 </motion.div>
               }
 
-              {/* DIRECT & TOP-UP METHODS (Shared structure) */}
               {(method === 'direct' || method === 'topup') &&
               <motion.div
                 key={method}
@@ -292,7 +279,6 @@ export function Payment() {
                     </select>
                   </div>
 
-                  {/* Transfer account number for the selected company */}
                   <AnimatePresence>
                     {activeCompany?.account_number &&
                   <motion.div
