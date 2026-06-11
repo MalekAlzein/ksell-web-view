@@ -1,9 +1,8 @@
 import React from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from './contexts/ThemeContext';
 // Pages
-import { Launcher } from './pages/Launcher';
 import { SelectPlan } from './pages/SelectPlan';
 import { Payment } from './pages/Payment';
 import { History } from './pages/History';
@@ -12,7 +11,7 @@ export function App() {
     <ThemeProvider>
       <HashRouter>
         <Routes>
-          <Route path="/" element={<Launcher />} />
+          <Route path="/" element={<Navigate to="/plans" replace />} />
           <Route path="/plans" element={<SelectPlan />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/history" element={<History />} />
