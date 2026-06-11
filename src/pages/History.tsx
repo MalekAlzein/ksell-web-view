@@ -8,6 +8,7 @@ import {
   isInbound,
   WalletTransaction } from
 '../lib/api';
+import { t } from '../lib/i18n';
 
 // Demo fallback so the canvas preview is never blank (used when the API call
 // fails, e.g. opened without an auth token).
@@ -64,11 +65,11 @@ export function History() {
     <Layout>
       {/* Fixed Header Area */}
       <div className="bg-slate-50 dark:bg-app-dark border-b border-slate-200 dark:border-slate-800 z-20 sticky top-0">
-        <Header title="Transaction History" showBack />
+        <Header title={t('transactionHistory')} showBack />
 
         <div className="px-6 pb-6 pt-2 text-center">
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-            Total Balance
+            {t('totalBalance')}
           </p>
           <p className="text-3xl font-bold text-slate-900 dark:text-white">
             {totalBalance === null ?
@@ -88,7 +89,7 @@ export function History() {
           </div> :
         txns.length === 0 ?
         <div className="text-center py-20 text-slate-400 text-sm">
-            No transactions yet.
+            {t('noTransactions')}
           </div> :
 
         <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -125,7 +126,7 @@ export function History() {
                 <div className="flex-1 min-w-0">
                   {/* Reason */}
                   <p className="font-semibold text-slate-900 dark:text-white truncate text-[15px]">
-                    {tx.reason ?? (inbound ? 'Credit' : 'Debit')}
+                    {tx.reason ?? (inbound ? t('credit') : t('debit'))}
                   </p>
                   {/* Created At */}
                   {tx.created_at &&
@@ -138,12 +139,12 @@ export function History() {
                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                       {tx.ad_request_id &&
                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                          Ad: {tx.ad_request_id}
+                          {t('adLabel')} {tx.ad_request_id}
                         </span>
                     }
                       {tx.transfer_company_id &&
                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                          Company: {tx.transfer_company_id}
+                          {t('companyLabel')} {tx.transfer_company_id}
                         </span>
                     }
                     </div>
@@ -177,7 +178,7 @@ export function History() {
             className="w-full py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex items-center justify-center gap-2">
 
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              Load more
+              {t('loadMore')}
             </button>
           </div>
         }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { HelpCircle, X } from 'lucide-react';
 import { getShowcaseUrl } from '../lib/api';
+import { t } from '../lib/i18n';
 
 // LocalStorage flag — matches the Flutter key so the "first time" video shows once.
 const FIRST_TIME_KEY = 'show_case_request_video';
@@ -63,7 +64,7 @@ export function HowItWorks() {
           onClick={() => videoId && setOpen(true)}
           className="bg-app-accent/10 dark:bg-app-accent/20 text-app-accent dark:text-red-400 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 text-sm font-medium border border-app-accent/20">
           <HelpCircle className="w-4 h-4" />
-          How it work
+          {t('howItWorks')}
         </button>
       </div>
 

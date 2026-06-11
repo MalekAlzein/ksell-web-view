@@ -7,6 +7,7 @@ import { Header } from '../components/Header';
 import { HowItWorks } from '../components/HowItWorks';
 import { useApi } from '../hooks/useApi';
 import { fetchAdPackages, getAdRequestId, AdPackage } from '../lib/api';
+import { t } from '../lib/i18n';
 
 // Demo fallback so the screen renders without a token / network.
 const fallback: AdPackage[] = [
@@ -26,7 +27,7 @@ export function SelectPlan() {
 
   return (
     <Layout>
-      <Header title="Select Ad Plan" showBack />
+      <Header title={t('selectAdPlan')} showBack />
 
       {loading ?
       <div className="flex-1 flex items-center justify-center text-slate-400">
@@ -68,7 +69,7 @@ export function SelectPlan() {
               <ul className="space-y-2 mb-6 text-sm text-slate-600 dark:text-slate-300">
                 <li className="flex items-start gap-2">
                   <span className="text-slate-400 mt-0.5">+ -</span>
-                  <span>Price: {plan.fees.toLocaleString()} IQD.</span>
+                  <span>{t('price')} {plan.fees.toLocaleString()} IQD.</span>
                 </li>
                 {plan.features.map((feature, i) =>
               <li key={i} className="flex items-start gap-2">
@@ -90,7 +91,7 @@ export function SelectPlan() {
               onClick={() => goToPayment(plan.id)}
               className="w-full bg-app-accent hover:bg-app-accentHover text-white font-medium py-3.5 rounded-xl transition-colors active:scale-[0.98]">
 
-                Pay
+                {t('pay')}
               </button>
             </div>
           </motion.div>

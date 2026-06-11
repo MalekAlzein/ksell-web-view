@@ -25,6 +25,7 @@ import {
   WalletBalance,
   TransferCompany } from
 '../lib/api';
+import { t } from '../lib/i18n';
 
 type PaymentMethod = 'wallet' | 'direct' | 'topup';
 
@@ -64,7 +65,7 @@ export function Payment() {
 
   const handleCopy = (text: string) => {
     navigator.clipboard?.writeText(text);
-    toast.success('Number copied to clipboard');
+    toast.success(t('numberCopied'));
   };
 
   // ---- Option 1: pay from wallet (PUT /pay-ad-request-with-wallet-flutter) ----
@@ -73,12 +74,12 @@ export function Payment() {
     setSubmitting(true);
     try {
       const res = await payWithWallet(adRequestId);
-      toast.success(res?.message ?? 'Payment successful!', {
+      toast.success(res?.message ?? t('paymentSuccess'), {
         icon: <CheckCircle2 className="w-5 h-5 text-green-500" />
       });
       wallet.reload();
     } catch (err: any) {
-      toast.error(err?.message ?? 'Insufficient Balance', {
+      toast.error(err?.message ?? t('insufficientBalance'), {
         icon: <AlertCircle className="w-5 h-5 text-red-500" />
       });
     } finally {
@@ -92,7 +93,7 @@ export function Payment() {
     if (!company) return;
     if (company.app_link) window.open(company.app_link, '_blank');
     setIsSubmitted(true);
-    toast.success('Payment Under Review');
+    toast.success(t('paymentUnderReview'));
   };
 
   // ---- Option 3: top up the wallet (POST /submit-top-up-flutter) ----
@@ -101,11 +102,11 @@ export function Payment() {
     const amount = Number(topUpAmount);
     const company = companyList.find((c) => String(c.id) === selectedCompany);
     if (!amount || amount <= 0) {
-      toast.error('Please enter a valid amount');
+      toast.error(t('enterValidAmount'));
       return;
     }
     if (!company) {
-      toast.error('Please select a transfer company');
+      toast.error(t('selectCompanyError'));
       return;
     }
     setSubmitting(true);
@@ -117,9 +118,9 @@ export function Payment() {
       const link = res?.redirect_url ?? company.app_link;
       if (link) window.open(link, '_blank');
       setIsSubmitted(true);
-      toast.success(res?.message ?? 'Payment Under Review');
+      toast.success(res?.message ?? t('paymentUnderReview'));
     } catch (err: any) {
-      toast.error(err?.message ?? 'Could not submit top-up');
+      toast.error(err?.message ?? t('topUpFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -127,7 +128,7 @@ export function Payment() {
 
   return (
     <Layout>
-      <Header title="Payment" showBack />
+      <Header title={t('payment')} showBack />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-8 pb-24">
         {/* Top Section: Summary */}
@@ -139,7 +140,7 @@ export function Payment() {
 
             <div className="text-start">
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-                Wallet Balance
+                {t('walletBalance')}
               </p>
               <p className="text-xl font-bold text-slate-900 dark:text-white">
                 {wallet.loading ?
@@ -161,7 +162,7 @@ export function Payment() {
           {/* For Pay Card */}
           <div className="w-full bg-white dark:bg-app-card rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-800">
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-              For Pay
+              {t('forPay')}
             </p>
             <p className="text-xl font-bold text-app-accent">
               {quote.loading ?
@@ -176,7 +177,7 @@ export function Payment() {
         {/* Middle Section: Payment Methods */}
         <div className="space-y-6">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white px-1">
-            Payment Method
+            {t('paymentMethod')}
           </h2>
 
           {/* Segmented Control */}
@@ -191,10 +192,10 @@ export function Payment() {
               className={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-all ${method === m ? 'bg-white dark:bg-app-card text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>
 
                 {m === 'wallet' ?
-              'Wallet' :
+              t('wallet') :
               m === 'direct' ?
-              'Direct' :
-              'Top-up'}
+              t('direct') :
+              t('topUp')}
               </button>
             )}
           </div>
@@ -222,7 +223,7 @@ export function Payment() {
 
                   <div className="bg-white dark:bg-app-card rounded-2xl p-5 border border-slate-200 dark:border-slate-800">
                     <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 text-center">
-                      Pay directly from your available wallet balance.
+                      {t('payFromWalletDesc')}
                     </p>
 
                     <button
@@ -232,7 +233,7 @@ export function Payment() {
 
                       {submitting &&
                     <Loader2 className="w-4 h-4 animate-spin" />}
-                      Pay Now
+                      {t('payNow')}
                     </button>
                   </div>
                 </motion.div>
@@ -259,13 +260,13 @@ export function Payment() {
                   {method === 'topup' &&
                 <div className="space-y-2">
                       <label className="text-sm font-medium text-slate-700 dark:text-slate-300 px-1">
-                        Amount to Top-up (IQD)
+                        {t('amountToTopUp')}
                       </label>
                       <input
                     type="number"
                     value={topUpAmount}
                     onChange={(e) => setTopUpAmount(e.target.value)}
-                    placeholder="e.g. 50000"
+                    placeholder={t('amountPlaceholder')}
                     className="w-full bg-white dark:bg-app-card border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-app-accent/50" />
 
                     </div>
@@ -273,7 +274,7 @@ export function Payment() {
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300 px-1">
-                      Select Transfer Company
+                      {t('selectTransferCompany')}
                     </label>
                     <select
                     value={selectedCompany}
@@ -281,7 +282,7 @@ export function Payment() {
                     className="w-full bg-white dark:bg-app-card border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-app-accent/50 appearance-none">
 
                       <option value="" disabled>
-                        Choose a company...
+                        {t('chooseCompany')}
                       </option>
                       {companyList.map((c) =>
                     <option key={c.id} value={String(c.id)}>
@@ -310,7 +311,7 @@ export function Payment() {
                     className="space-y-2 overflow-hidden">
 
                         <label className="text-sm font-medium text-slate-700 dark:text-slate-300 px-1">
-                          Transfer Number
+                          {t('transferNumber')}
                         </label>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 text-slate-900 dark:text-white font-mono text-lg tracking-wider">
@@ -328,9 +329,7 @@ export function Payment() {
                   </AnimatePresence>
 
                   <p className="text-xs text-slate-500 dark:text-slate-400 px-1">
-                    {method === 'direct' ?
-                  'Transfer the exact amount to the number above, then press Pay to submit it for review.' :
-                  'Enter an amount and transfer it to the number above, then press Pay to submit it for review.'}
+                    {method === 'direct' ? t('directHint') : t('topUpHint')}
                   </p>
 
                   <button
@@ -340,7 +339,7 @@ export function Payment() {
 
                     {submitting &&
                   <Loader2 className="w-4 h-4 animate-spin" />}
-                    Pay
+                    {t('pay')}
                   </button>
 
                   <AnimatePresence>
@@ -359,12 +358,10 @@ export function Payment() {
                         <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-500 shrink-0 mt-0.5" />
                         <div>
                           <h4 className="text-sm font-medium text-green-800 dark:text-green-400">
-                            Payment Under Review
+                            {t('paymentUnderReview')}
                           </h4>
                           <p className="text-xs text-green-600 dark:text-green-500/80 mt-1">
-                            Your transfer has been submitted and is currently
-                            being reviewed by our team. This usually takes a few
-                            minutes.
+                            {t('underReviewDetail')}
                           </p>
                         </div>
                       </motion.div>
