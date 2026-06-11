@@ -1,34 +1,69 @@
 // API client for the ksell wallet web view.
 //
-// This screen is opened inside the Flutter app's WebView. The native app passes
-// the authentication token (and the ad request id being paid for) as query
-// params on the URL, e.g.
-//   /payment?token=<bearer>&ad_request_id=2971&lang=ar
-// We read those once on load and use the token as a Bearer header for every
-// request against the ksell API.
+// This screen is opened inside the Flutter app's WebView. The native app hands
+// the auth token to this page in one of three ways (most → least secure):
+//   1. Inject it into storage (token never touches the URL, logs or Referer):
+//        controller.runJavaScript("localStorage.setItem('ksell_token','<t>')")
+//   2. Pass it in the URL *fragment* — never sent to the server, so it stays
+//      out of access logs:  /#/plans?token=<bearer>&ad_request_id=2971&lang=ar
+//   3. Pass it in the query string (legacy; visible in server access logs):
+//        /plans?token=<bearer>&ad_request_id=2971&lang=ar
+// However it arrives, we cache it in localStorage, strip it from the visible
+// URL, and send it as a Bearer header on every request to the ksell API.
 
 export const BASE_URL = 'https://ksell.net/apiv5/api';
 
-/** Read a value from the current URL query string. */
+const TOKEN_KEYS = ['token', 'access_token', 'auth_token'];
+
+/**
+ * Read a value from the URL — both the real query string (?a=b) and any query
+ * embedded in the hash fragment (#/route?a=b). The fragment is never sent to
+ * the server, so it is the safer place for the native app to carry the token.
+ */
 function param(...keys: string[]): string | null {
   if (typeof window === 'undefined') return null;
-  const q = new URLSearchParams(window.location.search);
-  for (const key of keys) {
-    const v = q.get(key);
-    if (v) return v;
+  const hash = window.location.hash.replace(/^#/, '');
+  const hashQuery = hash.includes('?') ? hash.slice(hash.indexOf('?') + 1) : '';
+  const sources = [
+    new URLSearchParams(window.location.search),
+    new URLSearchParams(hashQuery),
+  ];
+  for (const q of sources) {
+    for (const key of keys) {
+      const v = q.get(key);
+      if (v) return v;
+    }
   }
   return null;
 }
 
-/** Bearer token supplied by the native app (query param, then storage). */
+/** Remove the token from the visible query string once we've captured it. */
+function scrubTokenFromUrl(): void {
+  if (typeof window === 'undefined' || !window.history?.replaceState) return;
+  const search = new URLSearchParams(window.location.search);
+  let changed = false;
+  for (const key of TOKEN_KEYS) {
+    if (search.has(key)) {
+      search.delete(key);
+      changed = true;
+    }
+  }
+  if (!changed) return;
+  const qs = search.toString();
+  const newUrl = window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash;
+  window.history.replaceState(null, '', newUrl);
+}
+
+/** Bearer token supplied by the native app (URL, then storage). */
 export function getToken(): string | null {
-  const fromUrl = param('token', 'access_token', 'auth_token');
+  const fromUrl = param(...TOKEN_KEYS);
   if (fromUrl) {
     try {
       window.localStorage.setItem('ksell_token', fromUrl);
     } catch {
       /* ignore storage errors (private mode) */
     }
+    scrubTokenFromUrl();
     return fromUrl;
   }
   try {
