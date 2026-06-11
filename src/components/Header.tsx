@@ -11,6 +11,16 @@ export function Header({ title, showBack = false, onBack }: HeaderProps) {
   const navigate = useNavigate();
   const { dir } = useTheme();
   const handleClose = () => {
+    // When embedded in the Flutter app's WebView, ask the native app to close
+    // this screen (it listens on the "KsellApp" JS channel). Otherwise fall
+    // back to going home.
+    const bridge = (window as unknown as {
+      KsellApp?: { postMessage?: (msg: string) => void };
+    }).KsellApp;
+    if (bridge && typeof bridge.postMessage === 'function') {
+      bridge.postMessage('close');
+      return;
+    }
     navigate('/');
   };
   const handleBack = () => {
