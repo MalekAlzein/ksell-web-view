@@ -6,7 +6,7 @@ import { Layout } from '../components/Layout';
 import { Header } from '../components/Header';
 import { HowItWorks } from '../components/HowItWorks';
 import { useApi } from '../hooks/useApi';
-import { fetchAdPackages, getAdRequestId, AdPackage } from '../lib/api';
+import { fetchAdPackages, fetchWalletBalance, getAdRequestId, AdPackage, WalletBalance } from '../lib/api';
 import { t } from '../lib/i18n';
 
 const fallback: AdPackage[] = [
@@ -18,6 +18,7 @@ export function SelectPlan() {
   const navigate = useNavigate();
   const { data, loading } = useApi<AdPackage[]>(fetchAdPackages, [], fallback);
   const plans = data ?? [];
+  const wallet = useApi<WalletBalance>(fetchWalletBalance, [], { balance: 0, currency: 'IQD' });
 
   const goToPayment = (planId: number) => {
     navigate(`/payment?ad_request_id=${getAdRequestId()}&plan=${planId}`);
@@ -26,6 +27,19 @@ export function SelectPlan() {
   return (
     <Layout>
       <Header title={t('selectAdPlan')} showBack />
+
+      <div className="p-4 pb-0">
+        <div className="w-full bg-white dark:bg-app-card rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-800">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{t('walletBalance')}</p>
+          <p className="text-xl font-bold text-slate-900 dark:text-white">
+            {wallet.loading ?
+            <span className="inline-block h-6 w-28 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" /> :
+
+            `${(wallet.data?.balance ?? 0).toLocaleString()} ${wallet.data?.currency ?? 'IQD'}`
+            }
+          </p>
+        </div>
+      </div>
 
       {loading ?
       <div className="flex-1 flex items-center justify-center text-slate-400">

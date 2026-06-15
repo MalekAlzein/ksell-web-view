@@ -252,7 +252,7 @@ export async function fetchAdPackages(): Promise<AdPackage[]> {
   const raw: any = await request<any>('GET', 'settings');
   const list: any[] = raw?.settings?.data ?? raw?.data ?? [];
   return list
-    .filter((p) => p?.description) // skip entries without plan details (e.g. "Showrooms")
+    .filter((p) => p && String(p?.name ?? '').trim() !== '')
     .map((p) => {
       const name: string = p?.name ?? '';
       const stars = (name.match(new RegExp(STAR, 'g')) ?? []).length;
