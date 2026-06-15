@@ -80,6 +80,11 @@ export function getAdRequestId(): string {
   return param('ad_request_id', 'adRequestId', 'request_id') ?? '2971';
 }
 
+/** The plan/package id chosen on the Select Plan screen (passed as ?plan=). */
+export function getSelectedPlanId(): string | null {
+  return param('plan', 'plan_id', 'setting_id');
+}
+
 /** Raw language code as passed in the URL (ar / en / fa for Kurdish). */
 export function getLang(): string {
   return param('lang', 'locale') ?? 'en';

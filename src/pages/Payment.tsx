@@ -18,12 +18,15 @@ import {
   fetchQuote,
   fetchWalletBalance,
   fetchTransferCompanies,
+  fetchAdPackages,
   payWithWallet,
   submitTopUp,
   getAdRequestId,
+  getSelectedPlanId,
   Quote,
   WalletBalance,
-  TransferCompany } from
+  TransferCompany,
+  AdPackage } from
 '../lib/api';
 import { t } from '../lib/i18n';
 
@@ -35,6 +38,10 @@ export function Payment() {
   const navigate = useNavigate();
   const { dir } = useTheme();
   const adRequestId = getAdRequestId();
+
+  const planId = getSelectedPlanId();
+  const packages = useApi<AdPackage[]>(fetchAdPackages, [], []);
+  const selectedPlan = packages.data?.find((p) => String(p.id) === planId);
 
   const quote = useApi<Quote>(() => fetchQuote(adRequestId), [adRequestId], {
     amount: 50000,
@@ -57,6 +64,11 @@ export function Payment() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const quoteAmount = quote.data?.amount ?? 0;
+  // "For Pay" = fees of the plan chosen on the Select Plan screen (/settings).
+  // Falls back to the quote endpoint when no plan was passed in the URL.
+  const forPayAmount = selectedPlan ? selectedPlan.fees : quoteAmount;
+  const forPayCurrency = selectedPlan ? 'IQD' : quote.data?.currency ?? 'IQD';
+  const forPayLoading = planId ? packages.loading : quote.loading;
   const balance = wallet.data?.balance ?? 0;
   const companyList = companies.data ?? [];
   const activeCompany = companyList.find((c) => String(c.id) === selectedCompany);
@@ -104,14 +116,21 @@ export function Payment() {
       toast.error(t('selectCompanyError'));
       return;
     }
+    // Open the transfer company link synchronously, inside the click gesture
+    // (same as Direct) — opening it after `await submitTopUp` makes the mobile
+    // WebView treat it as a non-gesture popup and block it.
+    if (company.app_link) window.open(company.app_link, '_blank');
     setSubmitting(true);
     try {
       const res = await submitTopUp({
         amount,
         transferCompanyId: company.id
       });
-      const link = res?.redirect_url ?? company.app_link;
-      if (link) window.open(link, '_blank');
+      // If the server returns a specific redirect URL and there was no app
+      // link to open above, fall back to it.
+      if (!company.app_link && res?.redirect_url) {
+        window.open(res.redirect_url, '_blank');
+      }
       setIsSubmitted(true);
       toast.success(res?.message ?? t('paymentUnderReview'));
     } catch (err: any) {
@@ -157,10 +176,10 @@ export function Payment() {
               {t('forPay')}
             </p>
             <p className="text-xl font-bold text-app-accent">
-              {quote.loading ?
+              {forPayLoading ?
               <span className="inline-block h-6 w-24 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" /> :
 
-              `${fmt(quoteAmount)} ${quote.data?.currency ?? 'IQD'}`
+              `${fmt(forPayAmount)} ${forPayCurrency}`
               }
             </p>
           </div>
