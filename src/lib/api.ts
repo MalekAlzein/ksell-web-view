@@ -330,6 +330,25 @@ export async function fetchTransferCompanies(): Promise<TransferCompany[]> {
   }));
 }
 
+/** Link the chosen plan/package (setting) to the ad request. Called by the
+ *  Select Plan screen's Pay button BEFORE navigating to payment — otherwise the
+ *  ad request has no pricing and the wallet pay fails with
+ *  "Ad request has no pricing settings". Throws ApiError on status:false. */
+export async function setAdRequestSetting(
+  settingId: number | string,
+  adRequestId = getAdRequestId()
+): Promise<{ ad_request_id: number; setting_id: number }> {
+  const raw: any = await request<any>('PUT', 'set-ad-request-setting-flutter', {
+    ad_request_id: Number(adRequestId),
+    setting_id: Number(settingId),
+  });
+  const d = raw?.data ?? raw;
+  return {
+    ad_request_id: toNumber(d?.ad_request_id ?? adRequestId),
+    setting_id: toNumber(d?.setting_id ?? settingId),
+  };
+}
+
 /** Option 1: pay the plan straight from the wallet balance. PUT. */
 export async function payWithWallet(adRequestId = getAdRequestId()): Promise<{ message?: string }> {
   return request('PUT', 'pay-ad-request-with-wallet-flutter', {

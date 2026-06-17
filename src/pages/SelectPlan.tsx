@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import { Star, Loader2 } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { Header } from '../components/Header';
 import { HowItWorks } from '../components/HowItWorks';
 import { useApi } from '../hooks/useApi';
-import { fetchAdPackages, fetchWalletBalance, getAdRequestId, AdPackage, WalletBalance } from '../lib/api';
+import { fetchAdPackages, fetchWalletBalance, setAdRequestSetting, getAdRequestId, AdPackage, WalletBalance } from '../lib/api';
 import { t } from '../lib/i18n';
 
 const fallback: AdPackage[] = [
@@ -19,9 +20,21 @@ export function SelectPlan() {
   const { data, loading } = useApi<AdPackage[]>(fetchAdPackages, [], fallback);
   const plans = data ?? [];
   const wallet = useApi<WalletBalance>(fetchWalletBalance, [], { balance: 0, currency: 'IQD' });
+  const [payingPlanId, setPayingPlanId] = useState<number | null>(null);
 
-  const goToPayment = (planId: number) => {
-    navigate(`/payment?ad_request_id=${getAdRequestId()}&plan=${planId}`);
+  const goToPayment = async (planId: number) => {
+    if (payingPlanId !== null) return;
+    setPayingPlanId(planId);
+    try {
+      // Link the chosen plan to the ad request BEFORE payment — otherwise the
+      // server has no pricing for it and the wallet pay fails with
+      // "Ad request has no pricing settings".
+      await setAdRequestSetting(planId);
+      navigate(`/payment?ad_request_id=${getAdRequestId()}&plan=${planId}`);
+    } catch (err: any) {
+      toast.error(err?.message ?? t('planLinkFailed'));
+      setPayingPlanId(null);
+    }
   };
 
   return (
@@ -99,8 +112,11 @@ export function SelectPlan() {
 
               <button
               onClick={() => goToPayment(plan.id)}
-              className="w-full bg-app-accent hover:bg-app-accentHover text-white font-medium py-3.5 rounded-xl transition-colors active:scale-[0.98]">
+              disabled={payingPlanId !== null}
+              className="w-full bg-app-accent hover:bg-app-accentHover disabled:opacity-60 text-white font-medium py-3.5 rounded-xl transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
 
+                {payingPlanId === plan.id &&
+              <Loader2 className="w-4 h-4 animate-spin" />}
                 {t('pay')}
               </button>
             </div>
