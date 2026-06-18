@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Star, Loader2 } from 'lucide-react';
+import { Star, Loader2, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { Header } from '../components/Header';
 import { HowItWorks } from '../components/HowItWorks';
+import { useTheme } from '../contexts/ThemeContext';
 import { useApi } from '../hooks/useApi';
 import { fetchAdPackages, fetchWalletBalance, setAdRequestSetting, getAdRequestId, AdPackage, WalletBalance } from '../lib/api';
 import { t } from '../lib/i18n';
@@ -17,6 +18,7 @@ const fallback: AdPackage[] = [
 
 export function SelectPlan() {
   const navigate = useNavigate();
+  const { dir } = useTheme();
   const { data, loading } = useApi<AdPackage[]>(fetchAdPackages, [], fallback);
   const plans = data ?? [];
   const wallet = useApi<WalletBalance>(fetchWalletBalance, [], { balance: 0, currency: 'IQD' });
@@ -42,16 +44,28 @@ export function SelectPlan() {
       <Header title={t('selectAdPlan')} showBack />
 
       <div className="p-4 pb-0">
-        <div className="w-full bg-white dark:bg-app-card rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-800">
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{t('walletBalance')}</p>
-          <p className="text-xl font-bold text-slate-900 dark:text-white">
-            {wallet.loading ?
-            <span className="inline-block h-6 w-28 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" /> :
+        <button
+          onClick={() => navigate('/history')}
+          className="w-full bg-white dark:bg-app-card rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-800 flex items-center justify-between group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/80">
 
-            `${(wallet.data?.balance ?? 0).toLocaleString()} ${wallet.data?.currency ?? 'IQD'}`
+          <div className="text-start">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{t('walletBalance')}</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-white">
+              {wallet.loading ?
+              <span className="inline-block h-6 w-28 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" /> :
+
+              `${(wallet.data?.balance ?? 0).toLocaleString()} ${wallet.data?.currency ?? 'IQD'}`
+              }
+            </p>
+          </div>
+          <div className="bg-slate-100 dark:bg-slate-800 p-2 rounded-full text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+            {dir === 'rtl' ?
+            <ChevronLeft className="w-5 h-5" /> :
+
+            <ChevronRight className="w-5 h-5" />
             }
-          </p>
-        </div>
+          </div>
+        </button>
       </div>
 
       {loading ?
