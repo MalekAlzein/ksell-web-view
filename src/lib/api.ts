@@ -1,15 +1,3 @@
-// API client for the ksell wallet web view.
-//
-// This screen is opened inside the Flutter app's WebView. The native app hands
-// the auth token to this page in one of three ways (most → least secure):
-//   1. Inject it into storage (token never touches the URL, logs or Referer):
-//        controller.runJavaScript("localStorage.setItem('ksell_token','<t>')")
-//   2. Pass it in the URL *fragment* — never sent to the server, so it stays
-//      out of access logs:  /#/plans?token=<bearer>&ad_request_id=2971&lang=ar
-//   3. Pass it in the query string (legacy; visible in server access logs):
-//        /plans?token=<bearer>&ad_request_id=2971&lang=ar
-// However it arrives, we cache it in localStorage, strip it from the visible
-// URL, and send it as a Bearer header on every request to the ksell API.
 
 export const BASE_URL = 'https://ksell.net/apiv5/api';
 
@@ -75,9 +63,11 @@ export function getToken(): string | null {
   return null;
 }
 
-/** The ad request being paid for. PDF references /pay-ad-request-quote-flutter/2971. */
+/** The ad request being paid for, taken from the URL the native app passes.
+ *  Empty when absent — callers surface a normal "not found" error instead of
+ *  silently operating on some hardcoded example ad request. */
 export function getAdRequestId(): string {
-  return param('ad_request_id', 'adRequestId', 'request_id') ?? '2971';
+  return param('ad_request_id', 'adRequestId', 'request_id') ?? '';
 }
 
 /** The plan/package id chosen on the Select Plan screen (passed as ?plan=). */
