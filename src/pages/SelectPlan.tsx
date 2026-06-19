@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Star, Loader2, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Star, Loader2, ChevronRight, ChevronLeft, CheckCircle2 } from 'lucide-react';
 import { Layout } from '../components/Layout';
 import { Header } from '../components/Header';
 import { HowItWorks } from '../components/HowItWorks';
 import { useTheme } from '../contexts/ThemeContext';
 import { useApi } from '../hooks/useApi';
-import { fetchAdPackages, fetchWalletBalance, setAdRequestSetting, getAdRequestId, AdPackage, WalletBalance } from '../lib/api';
+import { fetchAdPackages, fetchWalletBalance, setAdRequestSetting, fetchQuote, getAdRequestId, AdPackage, WalletBalance, Quote } from '../lib/api';
 import { t } from '../lib/i18n';
 
 const fallback: AdPackage[] = [
@@ -22,10 +22,12 @@ export function SelectPlan() {
   const { data, loading } = useApi<AdPackage[]>(fetchAdPackages, [], fallback);
   const plans = data ?? [];
   const wallet = useApi<WalletBalance>(fetchWalletBalance, [], { balance: 0, currency: 'IQD' });
+  const quote = useApi<Quote>(() => fetchQuote(getAdRequestId()), []);
+  const isPaid = quote.data?.already_paid === true;
   const [payingPlanId, setPayingPlanId] = useState<number | null>(null);
 
   const goToPayment = async (planId: number) => {
-    if (payingPlanId !== null) return;
+    if (payingPlanId !== null || isPaid) return;
     setPayingPlanId(planId);
     try {
       // Link the chosen plan to the ad request BEFORE payment — otherwise the
@@ -42,6 +44,15 @@ export function SelectPlan() {
   return (
     <Layout>
       <Header title={t('selectAdPlan')} showBack />
+
+      {isPaid &&
+      <div className="p-4 pb-0">
+        <div className="w-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900/30 rounded-2xl p-4 flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-500" />
+          <span className="font-semibold text-green-800 dark:text-green-400">{t('paid')}</span>
+        </div>
+      </div>
+      }
 
       <div className="p-4 pb-0">
         <button
@@ -126,7 +137,7 @@ export function SelectPlan() {
 
               <button
               onClick={() => goToPayment(plan.id)}
-              disabled={payingPlanId !== null}
+              disabled={payingPlanId !== null || isPaid}
               className="w-full bg-app-accent hover:bg-app-accentHover disabled:opacity-60 text-white font-medium py-3.5 rounded-xl transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
 
                 {payingPlanId === plan.id &&

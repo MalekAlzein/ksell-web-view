@@ -205,6 +205,7 @@ export interface Quote {
   currency?: string;
   plan_name?: string;
   ad_request_id?: number;
+  already_paid?: boolean;
 }
 
 export interface WalletBalance {
@@ -295,6 +296,7 @@ export async function fetchQuote(adRequestId = getAdRequestId()): Promise<Quote>
     currency: q?.currency ?? 'IQD',
     plan_name: q?.plan_name ?? q?.name,
     ad_request_id: toNumber(q?.ad_request_id ?? adRequestId),
+    already_paid: q?.already_paid === true,
   };
 }
 
