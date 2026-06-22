@@ -108,31 +108,26 @@ export function Payment() {
     if (submitting) return;
     const amount = Number(topUpAmount);
     const company = companyList.find((c) => String(c.id) === selectedCompany);
-    if (!amount || amount <= 0) {
-      toast.error(t('enterValidAmount'));
+    if (!amount || amount < 1000) {
+      toast.error(t('minTopUpAmount'));
       return;
     }
     if (!company) {
       toast.error(t('selectCompanyError'));
       return;
     }
-    // Open the transfer company link synchronously, inside the click gesture
-    // (same as Direct) — opening it after `await submitTopUp` makes the mobile
-    // WebView treat it as a non-gesture popup and block it.
-    if (company.app_link) window.open(company.app_link, '_blank');
     setSubmitting(true);
     try {
       const res = await submitTopUp({
         amount,
         transferCompanyId: company.id
       });
-      // If the server returns a specific redirect URL and there was no app
-      // link to open above, fall back to it.
-      if (!company.app_link && res?.redirect_url) {
-        window.open(res.redirect_url, '_blank');
-      }
+      // Show the result first, then open the transfer company link — only
+      // when the request actually succeeded.
       setIsSubmitted(true);
       toast.success(res?.message ?? t('paymentUnderReview'));
+      const link = company.app_link ?? res?.redirect_url;
+      if (link) window.open(link, '_blank');
     } catch (err: any) {
       toast.error(err?.message ?? t('topUpFailed'));
     } finally {
